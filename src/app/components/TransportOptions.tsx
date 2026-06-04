@@ -122,11 +122,16 @@ export function TransportOptions({
 }: TransportOptionsProps) {
   const [selectedMode, setSelectedMode] = useState<TransportMode>('bus');
 
-  const handleOpenMaps = () => {
-    // Use Google Maps URL scheme with destination coordinates
+  const handleRouteClick = (route: Route, mode: TransportMode) => {
+    // Build Google Maps URL with specific travel mode
+    let travelMode = 'driving';
+    if (mode === 'bus') travelMode = 'transit';
+    if (mode === 'walk') travelMode = 'walking';
+    if (mode === 'bike') travelMode = 'bicycling';
+
     const mapsUrl = destinationLat && destinationLng
-      ? `https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLng}`
-      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`;
+      ? `https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLng}&travelmode=${travelMode}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=${travelMode}`;
 
     window.open(mapsUrl, '_blank');
   };
@@ -214,9 +219,10 @@ export function TransportOptions({
 
         {/* Route Cards */}
         {routes.map((route, index) => (
-          <div
+          <button
             key={index}
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+            onClick={() => handleRouteClick(route, selectedMode)}
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-teal-500 hover:shadow-md transition-all cursor-pointer w-full text-left"
           >
             <div className="flex items-start justify-between mb-3">
               <div>
@@ -233,7 +239,7 @@ export function TransportOptions({
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-3 text-sm mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-gray-500">Departs</span>
                 <span className="font-medium text-gray-900">{route.departTime}</span>
@@ -244,19 +250,15 @@ export function TransportOptions({
                 <span className="font-medium text-gray-900">{route.arriveTime}</span>
               </div>
             </div>
-          </div>
+
+            <div className="flex items-center justify-center gap-2 text-sm text-teal-600 font-medium">
+              <Navigation className="w-4 h-4" />
+              <span>View on Map</span>
+            </div>
+          </button>
         ))}
       </div>
 
-      {/* Bottom Button */}
-      <div className="border-t border-gray-200 bg-white px-4 py-4">
-        <button
-          onClick={handleOpenMaps}
-          className="w-full bg-teal-500 text-white py-3.5 rounded-xl font-semibold hover:bg-teal-600 transition-colors"
-        >
-          Open in Maps
-        </button>
-      </div>
     </div>
   );
 }
